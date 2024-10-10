@@ -686,12 +686,6 @@ class Map(geemap.Map):
     def add_layers(self):
         """Add base map layers to the map."""
         self.add_basemap("OpenStreetMap")
-        self.add_tile_layer(
-            "https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}",
-            name="Satellite",
-            attribution="Google",
-            shown=False,
-        )
 
     def initialize_interaction(self):
         """Set up map interaction handling."""

@@ -93,11 +93,7 @@ def reset_map(e, m):
     try:
 
         # Reset the layers
-        m.layers = [
-            layer
-            for layer in m.layers
-            if ("Satellite" in layer.name or "OpenStreetMap" in layer.name)
-        ]
+        m.layers = [layer for layer in m.layers if "OpenStreetMap" in layer.name]
 
         # Clear the output of the added variables widget
         with m.added_variables_output:
