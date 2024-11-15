@@ -1,0 +1,23 @@
+crop:
+- maize
+aliases:
+- rain_total:UCSB-CHG/CHIRPS/DAILY:precipitation:01/09/2018:01/02/2019:SUM
+- rain_mean:UCSB-CHG/CHIRPS/DAILY:precipitation:01/09/2018:01/02/2019:MEAN
+- rain:UCSB-CHG/CHIRPS/DAILY:precipitation:01/09/2018:01/02/2019:SUM
+- tmax:MODIS/061/MOD11A2:LST_Day_1km:01/09/2018:01/02/2019:MAX
+- tmin:MODIS/061/MOD11A2:LST_Night_1km:01/09/2018:01/02/2019:MIN
+- silt:projects/soilgrids-isric/silt_mean:silt_0-5cm_mean:01/09/2018:01/02/2019:LAST
+- sand:projects/soilgrids-isric/sand_mean:sand_0-5cm_mean:01/09/2018:01/02/2019:LAST
+- soc_0_5:projects/soilgrids-isric/ocd_mean:ocd_0-5cm_mean:01/09/2018:01/02/2019:LAST
+- soc_5_15:projects/soilgrids-isric/ocd_mean:ocd_5-15cm_mean:01/09/2018:01/02/2019:LAST
+- soc_15_30:projects/soilgrids-isric/ocd_mean:ocd_15-30cm_mean:01/09/2018:01/02/2019:LAST
+- n_0_5:projects/soilgrids-isric/nitrogen_mean:nitrogen_0-5cm_mean:01/09/2018:01/02/2019:LAST
+- n_5_15:projects/soilgrids-isric/nitrogen_mean:nitrogen_5-15cm_mean:01/09/2018:01/02/2019:LAST
+- n_15_30:projects/soilgrids-isric/nitrogen_mean:nitrogen_15-30cm_mean:01/09/2018:01/02/2019:LAST
+- ndvi:MODIS/061/MOD13A2:NDVI:01/09/2018:01/02/2019:MEAN
+features:
+- rain_days:(rain >= 2.5)
+- soc:(soc_0_5+soc_5_15+soc_15_30)/3
+- ntot:(n_0_5+n_5_15+n_15_30)/3
+land_cover: All
+task: cluster

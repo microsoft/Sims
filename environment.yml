@@ -1,0 +1,21 @@
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12.3
+  - mamba
+  - ca-certificates
+  - certifi
+  - openssl
+  - numpy
+  - pandas
+  - gdal
+  - geopandas
+  - shapely
+  - ipywidgets
+  - ipyleaflet
+  - pip
+  - pip:
+      - earthengine-api
+      - geemap
+      - solara
+      - python-dotenv

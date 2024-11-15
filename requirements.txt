@@ -1,0 +1,10 @@
+earthengine-api
+geemap
+shapely
+geopandas
+ipywidgets
+ipyleaflet
+solara
+python-dotenv
+multiprocess
+pyyaml
