@@ -111,3 +111,4 @@ public/
 .DS_Store
 pyproject.toml
 .github/
+credentials.json

@@ -8,7 +8,6 @@ This script creates the main Map objects and adds custom GUI widgets to it to en
 
 import os
 import yaml
-from pathlib import Path
 from datetime import date
 from dotenv import load_dotenv
 
@@ -47,15 +46,18 @@ from region_similarity.use_cases import import_spec, export_spec
 
 # Get authentication credentials
 google_credentials = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS")
-service_account = os.environ.get("SERVICE_ACCOUNT")
 
-# Authenticate to Earth Engine
-if Path(google_credentials).exists():
-    credentials = ee.ServiceAccountCredentials(service_account, google_credentials)
+# Authenticate to Earth Engine using GCP project-based authentication
+if not google_credentials:
+    raise ValueError(
+        "GCP project-based authentication requires both GOOGLE_APPLICATION_CREDENTIALS environment variables to be set"
+    )
+
+try:
+    credentials = ee.ServiceAccountCredentials("", google_credentials)
     ee.Initialize(credentials)
-else:
-    ee.Authenticate()
-    ee.Initialize()
+except Exception as e:
+    raise Exception(f"Failed to authenticate with GCP project credentials: {str(e)}")
 
 
 def ee_data_html(asset):
