@@ -55,7 +55,7 @@ if not google_credentials:
 
 try:
     credentials = ee.ServiceAccountCredentials("", google_credentials)
-    ee.Initialize(credentials)
+    ee.Initialize(credentials, opt_url="https://earthengine-highvolume.googleapis.com")
 except Exception as e:
     raise Exception(f"Failed to authenticate with GCP project credentials: {str(e)}")
 
@@ -226,7 +226,7 @@ class SearchGEEDataGUI(widgets.VBox):
                 datasets = m.search_datasets
                 dataset = datasets[assets_dropdown.index]
                 id_ = dataset["id"]
-                m.accordion.selected_index = 3
+                m.accordion.selected_index = 2
                 m.custom_product_input.value = id_
                 search_data_output.clear_output()
                 search_data_box.value = ""
@@ -344,17 +344,6 @@ class Map(geemap.Map):
     def create_widgets(self):
         """Create and configure all widgets used in the map interface."""
 
-        self.download_bar = widgets.IntProgress(
-            value=0,
-            min=0,
-            max=100,
-            description="Processing:",
-            bar_style="",
-            style={"bar_color": "green"},
-            orientation="horizontal",
-            layout=widgets.Layout(visibility="hidden", height="0px"),
-        )
-
         self.output_widget = widgets.Output(layout={"border": "1px solid black"})
         self.reset_button = widgets.Button(
             description="Reset Map",
@@ -370,6 +359,30 @@ class Map(geemap.Map):
         )
 
         self.spec_export_button.on_click(lambda event: export_spec(event, self))
+
+        self.spec_import_button = widgets.FileUpload(
+            description="Import Session",
+            accept=".yaml",
+            multiple=False,
+            tooltip="Upload a specification YAML file to preload parameters.",
+            layout=widgets.Layout(width="100%", height="30px"),
+        )
+
+        def handle_spec_upload(change):
+            if not change["new"]:
+                return
+            content = change["new"][0]["content"]
+            try:
+                spec_data = yaml.safe_load(content.decode("utf-8"))
+                import_spec(self, spec_data)
+            except yaml.YAMLError as e:
+                message(self, f"Error parsing YAML file: {str(e)}", False)
+                message(self, f"Error parsing YAML file: {str(e)}", True)
+            except Exception as e:
+                message(self, f"Error importing specification: {str(e)}", False)
+                message(self, f"Error importing specification: {str(e)}", True)
+
+        self.spec_import_button.observe(handle_spec_upload, names="value")
 
         self.set_region_button = widgets.Button(
             description="Use Drawn Shapes",
@@ -574,56 +587,10 @@ class Map(geemap.Map):
         )
         optional = widgets.VBox([self.mask_dropdown, self.distance_dropdown])
 
-        self.spec_import_upload = widgets.FileUpload(
-            description="Import File",
-            accept=".yaml",
-            multiple=False,
-            tooltip="Upload a specification YAML file to preload parameters.",
-            layout=widgets.Layout(width="100%", margin="10px 0px 0px 0px"),
-        )
-
-        def handle_spec_upload(change):
-            content = change["new"][0]["content"]
-            try:
-                spec_data = yaml.safe_load(content.decode("utf-8"))
-                import_spec(self, spec_data)
-            except yaml.YAMLError as e:
-                message(self, f"Error parsing YAML file: {str(e)}", False)
-                message(self, f"Error parsing YAML file: {str(e)}", True)
-            except Exception as e:
-                message(self, f"Error importing specification: {str(e)}", False)
-                message(self, f"Error importing specification: {str(e)}", True)
-
-        self.spec_import_upload.observe(handle_spec_upload, names="value")
-
-        self.use_case_dropdown = widgets.Dropdown(
-            options=["Select...", "Cassava Similarity", "Maize Cluster"],
-            description="Use Cases",
-        )
-
-        def on_use_case(use_case_name):
-            if use_case_name == "Cassava Similarity":
-                use_case_path = "../usecases/cassava-similarity.yaml"
-            elif use_case_name == "Maize Cluster":
-                use_case_path = "../usecases/maize-cluster.yaml"
-            else:
-                return
-            with open(use_case_path, "r") as file:
-                spec_data = yaml.safe_load(file)
-                import_spec(self, spec_data)
-
-        self.use_case_dropdown.observe(
-            lambda change: on_use_case(change["new"]), names="value"
-        )
-        use_cases_buttons = widgets.VBox(
-            [self.use_case_dropdown, self.spec_import_upload]
-        )
-
         self.accordion = widgets.Accordion(
             children=[
                 set_regions,
                 set_periods,
-                use_cases_buttons,
                 set_aliases,
                 set_features,
                 optional,
@@ -631,10 +598,9 @@ class Map(geemap.Map):
         )
         self.accordion.set_title(0, "Step 1: Set Regions")
         self.accordion.set_title(1, "Step 2: Set Period")
-        self.accordion.set_title(2, "Use Cases")
-        self.accordion.set_title(3, "Set Variables")
-        self.accordion.set_title(4, "Set Features")
-        self.accordion.set_title(5, "Optional")
+        self.accordion.set_title(2, "Set Variables")
+        self.accordion.set_title(3, "Set Features")
+        self.accordion.set_title(4, "Optional")
         self.accordion.selected_index = 0
 
         # Close the layers
@@ -655,9 +621,9 @@ class Map(geemap.Map):
                 self.search_button,
                 self.max_value_slider,
                 self.export_button,
-                self.download_bar,
                 self.reset_button,
                 self.spec_export_button,
+                self.spec_import_button,
             ],
             layout=widgets.Layout(padding="10px"),
         )

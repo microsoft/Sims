@@ -140,6 +140,7 @@ def reset_map(e, m):
         m.download_bar.value = 0
         m.download_bar.layout.visibility = "hidden"
         m.download_bar.layout.height = "0px"
+        m.spec_import_button.value = tuple()
 
     except Exception as e:
         message(m, f"Error resetting map: {e}", False)

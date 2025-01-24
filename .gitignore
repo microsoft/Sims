@@ -112,3 +112,4 @@ public/
 pyproject.toml
 .github/
 credentials.json
+sims-key.json
