@@ -58,80 +58,90 @@ def generate_random_hash(length=16):
 
 
 @task
-def export_single_image(job_dir, img, roi, resolution, m):
+def export_single_image(img, roi, resolution, m):
     """
-    Export a single Earth Engine image to a local file.
+    Export a single Earth Engine image to a download URL.
 
     Args:
-        job_dir (Path): Directory to save the exported image.
         img (ee.Image): Earth Engine image to export.
-        roi (ee.Geometry): Region of interest to clip the image.
+        roi (ee.Geometry): Region of interest to clip and export the image.
         resolution (float): Spatial resolution of the exported image in meters.
-        m: Object containing message and URL information.
+        m: Object containing message and URL information for status updates.
+
+    The function attempts to generate a download URL for the image and displays
+    status messages through the provided messaging object. If successful, it shows
+    the download URL. If an error occurs, it displays the error message.
     """
-    fp = job_dir / "image.tif"
-    message(m, f"Exporting image...", False)
-    geemap.ee_export_image(
-        img.clip(roi),
-        filename=fp,
-        scale=resolution,
-        region=roi,
-        file_per_band=False,
-    )
-    # Compress the job directory using zip
-    zip_path = compress_dir(job_dir, Path("../public/"))
-    message(m, f"Exporting image...", True)
-    message(m, f"Download link: {m.url}/static/public/{zip_path.name}.zip", False)
-    message(
-        m,
-        f"Download link: {m.url}/static/public/{zip_path.name}.zip",
-        True,
-        duration=10,
-    )
+    message(m, f"Generating download URL...", False)
+
+    try:
+        url = img.getDownloadURL(
+            {
+                "scale": resolution,
+                "region": roi,
+                "format": "GEO_TIFF",
+                "filePerBand": False,
+            }
+        )
+
+        message(m, f"Generating download URL...", True)
+        message(m, f"Download link: {url}", False)
+        message(m, f"Download link: {url}", True, duration=10)
+
+    except Exception as e:
+        message(m, f"Error generating download URL: {e}", False)
+        message(m, f"Error generating download URL: {e}", True, duration=5)
 
 
 @task
 def export_multiple_images(cells, job_dir, img, resolution, m):
     """
-    Export multiple Earth Engine images to local files.
+    Export multiple Earth Engine images to download URLs.
 
     Args:
         cells (list): List of Earth Engine geometries representing image cells.
-        job_dir (Path): Directory to save the exported images.
+        job_dir (Path): Directory to save the exported images (unused).
         img (ee.Image): Earth Engine image to export.
         resolution (float): Spatial resolution of the exported images in meters.
         m: Object containing message, URL, and progress bar information.
     """
+    message(m, f"Generating download URLs...", False)
+    urls = []
     for idx, cell in enumerate(cells):
-        m.download_bar.value = idx + 1
-        cell_fp = job_dir / f"image_{str(idx+1).zfill(2)}.tif"
         try:
-            with contextlib.redirect_stdout(io.StringIO()):
-                geemap.ee_export_image(
-                    img.clip(cell),
-                    filename=cell_fp,
-                    scale=resolution,
-                    region=cell,
-                    file_per_band=False,
+            urls.append(
+                img.clip(cell).getDownloadURL(
+                    {
+                        "scale": resolution,
+                        "region": cell,
+                        "format": "GEO_TIFF",
+                        "filePerBand": False,
+                    }
                 )
+            )
         except Exception as ex:
-            message(m, f"Error exporting cell {idx+1}: {ex}", False)
-            message(m, f"Error exporting cell {idx+1}: {ex}", True, 5)
+            message(m, f"Error generating URL for cell {idx+1}: {ex}", False)
+            message(m, f"Error generating URL for cell {idx+1}: {ex}", True, 5)
 
-    # Compress the job directory using zip
-    zip_path = compress_dir(job_dir, Path("../public/"))
-    message(m, f"Download link: {m.url}/static/public/{zip_path.name}.zip", False)
+    # Save URLs to a file
+    random_hash = generate_random_hash()
+    url_file = Path("../public") / f"urls_{random_hash}.txt"
+    url_file.parent.mkdir(exist_ok=True)
+    url_file.write_text("\n".join(urls))
+
+    # Share the URL file location
+    message(m, f"Generating download URLs...", True)
     message(
         m,
-        f"Download link: {m.url}/static/public/{zip_path.name}.zip",
+        f"Download URLs available at: {m.url}/static/public/urls_{random_hash}.txt",
+        False,
+    )
+    message(
+        m,
+        f"Download URLs available at: {m.url}/static/public/urls_{random_hash}.txt",
         True,
         duration=10,
     )
-
-    # Reset the progress bar
-    m.download_bar.layout.visibility = "hidden"
-    m.download_bar.layout.height = "0px"
-    m.download_bar.value = m.download_bar.max = 0
 
 
 def export_image(e, m):
@@ -221,16 +231,11 @@ def export_image(e, m):
 
         # Export the image directly if only one cell is needed
         if x_cells <= 1 and y_cells <= 1:
-            export_single_image(job_dir, img, m.qr, resolution, m)
+            export_single_image(img, m.qr, resolution, m)
             return
 
         # Split the geometry and export each cell
         cells = split_geometry(x_cells, y_cells)
-        m.download_bar.max = len(cells)
-        m.download_bar.layout.visibility = "visible"
-        m.download_bar.layout.height = "--jp-widgets-inline-height"
-        m.download_bar.description = f"{len(cells)} cells:"
-
         export_multiple_images(cells, job_dir, img, resolution, m)
 
     except Exception as e:

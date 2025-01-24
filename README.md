@@ -1,6 +1,6 @@
 # Sims
 
-This repository contains the source code for `Sims: An Interactive Tool for Geospatial Matching and Clustering`.
+`Sims` is an interactive web tool that helps users find similar geographical regions or cluster areas based on environmental characteristics. Using Google Earth Engine as backend, it allows you to select a reference area and find other locations that share similar features like rainfall patterns, soil composition, vegetation indices, and land cover types. This makes it particularly valuable for agricultural planning, environmental research, and land-use analysis.
 
 ## GCP Setup
 
@@ -63,7 +63,6 @@ Before running the application, you'll need to set up Google Cloud Platform cred
 
 5. Grant necessary permissions:
    ```bash
-   # Replace with required roles for your specific use case
    gcloud projects add-iam-policy-binding YOUR_PROJECT_ID \
        --member="serviceAccount:sims-service-account@YOUR_PROJECT_ID.iam.gserviceaccount.com" \
        --role="roles/storage.objectViewer"
@@ -85,6 +84,7 @@ pip install -e .
 
 You can run the app locally:
 ```bash
+export GOOGLE_APPLICATION_CREDENTIALS="$(pwd)/sims-key.json"
 cd scripts/
 solara run app.py
 ```

@@ -296,14 +296,14 @@ def add_alias(
         None
     """
 
+    # Get the selected product ID, layer, and alias
+    dataset_id = m.custom_product_input.value if dataset is None else dataset
+    layer_id = m.band_dropdown.value if layer is None else layer
+
     # If the alias is empty, we will set it to be `{dataset}:{layer}`
     alias = m.layer_alias_input.value if alias_name is None else alias_name
     if not alias:
         alias = f"{agg_fun}({layer_id})" if agg_fun != "NONE" else layer_id
-
-    # Get the selected product ID, layer, and alias
-    dataset_id = m.custom_product_input.value if dataset is None else dataset
-    layer_id = m.band_dropdown.value if layer is None else layer
 
     # If the dataset or layer is empty, we will not add the alias
     if not dataset_id or not layer_id:
