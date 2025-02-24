@@ -120,6 +120,7 @@ docker run -it \
   -p 8080:8080 \
   -v $(pwd)/credentials.json:/app/credentials.json \
   -e GOOGLE_APPLICATION_CREDENTIALS=/app/credentials.json \
+  -e HOST="localhost:8080" \
   sims-app
 ```
 
