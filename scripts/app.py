@@ -43,6 +43,8 @@ from region_similarity.export import export_image
 from region_similarity.helpers import message, update_map
 from region_similarity.use_cases import import_spec, export_spec
 
+# Define host
+hostname = os.environ.get("HOST")
 
 # Get authentication credentials
 google_credentials = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS")
@@ -326,7 +328,7 @@ class Map(geemap.Map):
 
     def initialize_map(self):
         """Initialize map properties and clear existing layers."""
-        self.url = "http://sims.eastus2.cloudapp.azure.com"
+        self.url = hostname
         self.clear_layers()
         self.qr_set = False
         self.roi_set = False

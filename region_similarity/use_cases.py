@@ -65,7 +65,7 @@ def import_spec(m, spec_data):
             message(m, "Error: No query region provided in spec or set on map.", False)
             message(m, "Error: No query region provided in spec or set on map.", True)
             return
-        query_region = m.qr.coordinates().getInfo()[0]
+        query_region = m.qr.coordinates().getInfo()
 
     if task == "search":
         reference_region = regions.get("reference_region")
@@ -82,7 +82,7 @@ def import_spec(m, spec_data):
                     True,
                 )
                 return
-            reference_region = m.roi
+            reference_region = m.roi.coordinates().getInfo()
 
     # Set default period
     default_start = m.start_date.value
@@ -140,7 +140,7 @@ def import_spec(m, spec_data):
 
     # Set regions
     if query_region:
-        query_geom = shape({"type": "Polygon", "coordinates": [query_region]})
+        query_geom = shape({"type": "MultiPolygon", "coordinates": query_region})
         m.qr = ee.Geometry(mapping(query_geom))
         m.add_gdf(
             gpd.GeoDataFrame(geometry=[query_geom], crs="EPSG:4326"),
@@ -158,7 +158,7 @@ def import_spec(m, spec_data):
         m.qr_set = True
 
     if task == "search" and reference_region:
-        reference_geom = shape({"type": "Polygon", "coordinates": [reference_region]})
+        reference_geom = shape({"type": "MultiPolygon", "coordinates": reference_region})
         m.roi = ee.Geometry(mapping(reference_geom))
         m.add_gdf(
             gpd.GeoDataFrame(geometry=[reference_geom], crs="EPSG:4326"),
@@ -240,8 +240,30 @@ def export_spec(e, m):
         features.append(f"{name}:{expression}")
 
     # Get geometries
-    query_region = m.qr.coordinates().getInfo()[0] if m.qr else []
-    reference_region = m.roi.coordinates().getInfo()[0] if m.roi else []
+    query_region = m.qr.coordinates().getInfo() if m.qr else []
+    reference_region = m.roi.coordinates().getInfo() if m.roi else []
+
+    # Ensure proper nesting
+    def ensure_depth(lst, target_depth):
+        # Recursively ensure the list has the target depth
+        current_depth = get_depth(lst)
+        
+        while current_depth < target_depth:
+            lst = [lst]  # Add a new level of nesting
+            current_depth += 1
+        
+        # If current depth is greater than target, we may need to truncate or adjust the list,
+        # but for now, we are assuming both lists already fit this condition.
+        return lst
+    
+    def get_depth(lst):
+        # This function returns the depth of a nested list
+        if isinstance(lst, list) and lst:
+            return 1 + max(get_depth(item) for item in lst)
+        return 0
+
+    query_region = ensure_depth(query_region, 4)
+    reference_region = ensure_depth(reference_region, 4)
 
     # If there is no query region, return
     if not query_region:
@@ -270,7 +292,7 @@ def export_spec(e, m):
     filename = f"{str(uuid.uuid4())}.yaml"
 
     # Save the file in the public directory
-    public_dir = Path("../public")
+    public_dir = Path("./public")
     public_dir.mkdir(exist_ok=True)
     file_path = public_dir / filename
 
