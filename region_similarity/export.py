@@ -180,7 +180,7 @@ def export_image(e, m):
         features = m.feature_img
 
         # Stack the features and the result
-        img = ee.Image.cat([features, result])
+        img = ee.Image.cat([features, result]).reproject(crs='EPSG:4326', scale=1000)
 
         # Set the image resolution in meters
         resolution = 100
