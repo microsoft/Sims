@@ -21,7 +21,6 @@ from geemap.common import search_ee_data, geocode
 import ipywidgets as widgets
 from ipyleaflet import WidgetControl
 import solara
-from IPython.core.display import display
 
 from region_similarity.map import (
     reset_map,
