@@ -125,7 +125,7 @@ def export_multiple_images(cells, job_dir, img, resolution, m):
 
     # Save URLs to a file
     random_hash = generate_random_hash()
-    url_file = Path("../public") / f"urls_{random_hash}.txt"
+    url_file = Path("./public") / f"urls_{random_hash}.txt"
     url_file.parent.mkdir(exist_ok=True)
     url_file.write_text("\n".join(urls))
 
@@ -174,7 +174,7 @@ def export_image(e, m):
         job_dir.mkdir(exist_ok=True)
 
         # Get the image based on the mode (clustering vs searching)
-        result = m.clustered if m.cluster else m.distances
+        result = m.clustered if m.cluster else m.average_distance
 
         # Get the features
         features = m.feature_img
@@ -183,7 +183,7 @@ def export_image(e, m):
         img = ee.Image.cat([features, result]).reproject(crs='EPSG:4326', scale=1000)
 
         # Set the image resolution in meters
-        resolution = 100
+        resolution = 1000
 
         # Convert the image resolution from meters to degrees
         meters_per_degree = 111320  # Approximation at the equator

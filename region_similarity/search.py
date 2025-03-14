@@ -238,7 +238,7 @@ def cluster(e, m):
         # Create the training dataset
         training = m.feature_img.sample(
             region=m.qr,
-            scale=100,
+            scale=1000,
             numPixels=5_000,
         )
 
