@@ -174,7 +174,7 @@ def export_image(e, m):
         job_dir.mkdir(exist_ok=True)
 
         # Get the image based on the mode (clustering vs searching)
-        result = m.clustered if m.cluster else m.distances
+        result = m.clustered if m.cluster else m.average_distance
 
         # Get the features
         features = m.feature_img
