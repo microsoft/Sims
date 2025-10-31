@@ -118,7 +118,7 @@ traittypes==0.2.1
 typing_extensions==4.12.2
 tzdata==2024.2
 uritemplate==4.1.1
-urllib3==2.2.3
+urllib3==2.5.0
 uvicorn==0.32.0
 watchdog==6.0.0
 watchfiles==0.24.0
