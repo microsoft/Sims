@@ -102,7 +102,7 @@ rich-click==1.8.4
 rpds-py==0.21.0
 rsa==4.9
 scooby==0.10.0
-setuptools==75.3.0
+setuptools==78.1.1
 shapely==2.0.6
 six==1.16.0
 sniffio==1.3.1
