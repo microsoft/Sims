@@ -81,7 +81,7 @@ pure_eval==0.2.3
 pyasn1==0.6.1
 pyasn1_modules==0.4.1
 Pygments==2.18.0
-pymdown-extensions==10.12
+pymdown-extensions==10.16.1
 pyogrio==0.10.0
 pyparsing==3.2.0
 pyperclip==1.9.0
