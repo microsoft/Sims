@@ -78,7 +78,7 @@ protobuf==5.28.3
 psutil==6.1.0
 ptyprocess==0.7.0
 pure_eval==0.2.3
-pyasn1==0.6.1
+pyasn1==0.6.2
 pyasn1_modules==0.4.1
 Pygments==2.18.0
 pymdown-extensions==10.12
